@@ -30,7 +30,7 @@ fn app2(terminal: &mut DefaultTerminal) -> Result<(), Box<dyn std::error::Error>
         f.render_widget(image, f.area());
       });
       if crossterm::event::read()?.is_key_press() {
-          break Ok(())
+          break
       }
     }
     Ok(())
