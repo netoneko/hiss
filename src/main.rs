@@ -37,7 +37,7 @@ fn find_image(path: PathBuf) -> Option<PathBuf> {
         if entry_path.is_file() {
             if let Some(extension) = entry_path.extension() {
                 if extension == "jpg" || extension == "png" {
-                    break Some(entry_path.file_name().unwrap().into())
+                    break Some(entry_path)
                 }
             }
         }
