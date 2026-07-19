@@ -58,11 +58,7 @@ fn app_builder(
         println!("dimentions {}x{}", dyn_img.width(), dyn_img.height());
 
         let picker = Picker::from_query_stdio()?;
-        let font_size = picker.font_size();
-        let size = Size::new(
-            dyn_img.width().div_ceil(font_size.width as u32) as u16,
-            dyn_img.height().div_ceil(font_size.height as u32) as u16,
-        );
+        let size = terminal.size()?;
 
         let image = picker.new_protocol(dyn_img, size, Resize::Fit(None))?;
 
