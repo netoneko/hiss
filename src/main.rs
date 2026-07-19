@@ -59,5 +59,5 @@ fn app_builder(
         Ok(())
     };
 
-    Ok(&app_fn)
+    app_fn
 }
