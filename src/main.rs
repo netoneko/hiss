@@ -29,31 +29,32 @@ fn main() -> color_eyre::Result<(), Box<dyn std::error::Error>> {
 }
 
 fn find_image(path: PathBuf) -> Option<PathBuf> {
-    let path = for entry in std::fs::read_dir(path).ok()? {
-        let entry = entry.ok()?;
-        let path = entry.path();
+    let mut entries = std::fs::read_dir(path).ok()?;
+    loop {
+        let entry = entries.next()?.ok()?;
+        let entry_path = entry.path();
 
-        if path.is_file() {
-            if let Some(extension) = path.extension() {
-                if extension == ".jpg" || extension == ".png" {
-                    break Ok(path)
+        if entry_path.is_file() {
+            if let Some(extension) = entry_path.extension() {
+                if extension == "jpg" || extension == "png" {
+                    break Some(entry_path.file_name().unwrap().into())
                 }
             }
         }
-    };
-
-    Ok(())
+    }
 }
 
 fn app_builder(
     app: &App,
 ) -> fn(terminal: &mut DefaultTerminal) -> Result<(), Box<dyn std::error::Error>> {
     let app_fn = |terminal: &mut DefaultTerminal| -> Result<(), Box<dyn std::error::Error>> {
-        let img_name = find_image(app.args.path);
-        println!("rendering {}", img_name);
+        let img_name = find_image(app.args.path.clone())
+            .ok_or_else(|| "no image found in the directory")?; //.to_string();
+
+        println!("rendering {:?}", img_name);
 
         let dyn_img = image::ImageReader::open(img_name)?.decode()?;
-        println!("image {} exists", img_name);
+        println!("image {:?} exists", img_name);
         println!("dimentions {}x{}", dyn_img.width(), dyn_img.height());
 
         let picker = Picker::from_query_stdio()?;
