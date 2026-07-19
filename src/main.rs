@@ -46,14 +46,14 @@ fn find_image(path: PathBuf) -> Option<PathBuf> {
 
 fn app_builder(
     app: &App,
-) -> fn(terminal: &mut DefaultTerminal) -> Result<(), Box<dyn std::error::Error>> {
+) -> Box<dyn FnOnce(&mut DefaultTerminal) -> Result<(), Box<dyn std::error::Error>> + '_> {
     let app_fn = |terminal: &mut DefaultTerminal| -> Result<(), Box<dyn std::error::Error>> {
         let img_name = find_image(app.args.path.clone())
             .ok_or_else(|| "no image found in the directory")?; //.to_string();
 
         println!("rendering {:?}", img_name);
 
-        let dyn_img = image::ImageReader::open(img_name)?.decode()?;
+        let dyn_img = image::ImageReader::open(img_name.clone())?.decode()?;
         println!("image {:?} exists", img_name);
         println!("dimentions {}x{}", dyn_img.width(), dyn_img.height());
 
@@ -78,5 +78,5 @@ fn app_builder(
         Ok(())
     };
 
-    app_fn
+    Box::new(app_fn)
 }
