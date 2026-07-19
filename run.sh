@@ -44,11 +44,14 @@ if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
     docker build -t "$IMAGE" "$SCRIPT_DIR/docker"
 fi
 
+# target/ gets its own volume (not the virtiofs bind mount above) - cargo
+# builds stall/hang over Docker Desktop's Mac<->VM file sharing otherwise.
 docker run --rm -it \
     -v "$MUSIC_DIR:/music:ro" \
     -v "$SCRIPT_DIR:/src/hiss" \
     -v hiss-cargo-registry:/usr/local/cargo/registry \
     -v hiss-cargo-git:/usr/local/cargo/git \
+    -v hiss-target:/src/hiss/target \
     -e PULSE_SERVER="tcp:host.docker.internal:4713" \
     -w /src/hiss \
     "$IMAGE" "$@"
