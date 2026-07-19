@@ -1,5 +1,6 @@
 use clap::Parser;
 use std::path::PathBuf;
+use std::fs::read_dir;
 
 use ratatui::{DefaultTerminal, Frame, layout::Size};
 use ratatui_image::{Image, Resize, picker::Picker, protocol::Protocol};
@@ -27,11 +28,28 @@ fn main() -> color_eyre::Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+fn find_image(path: PathBuf) -> Option<PathBuf> {
+    let path = for entry in std::fs::read_dir(path).ok()? {
+        let entry = entry.ok()?;
+        let path = entry.path();
+
+        if path.is_file() {
+            if let Some(extension) = path.extension() {
+                if extension == ".jpg" || extension == ".png" {
+                    break Ok(path)
+                }
+            }
+        }
+    };
+
+    Ok(())
+}
+
 fn app_builder(
     app: &App,
 ) -> fn(terminal: &mut DefaultTerminal) -> Result<(), Box<dyn std::error::Error>> {
     let app_fn = |terminal: &mut DefaultTerminal| -> Result<(), Box<dyn std::error::Error>> {
-        let img_name = "./public/onyxia.jpg";
+        let img_name = find_image(app.args.path);
         println!("rendering {}", img_name);
 
         let dyn_img = image::ImageReader::open(img_name)?.decode()?;
